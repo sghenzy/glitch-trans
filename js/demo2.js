@@ -26,13 +26,13 @@ let sketch = new Sketch({
       float aspectRatio = resolution.x / resolution.y;
       float imageAspectRatio = resolution.z / resolution.w;
 
-      // Correggiamo le UV per assicurare che il video copra l'intera finestra senza distorsioni
+      // Riduciamo leggermente il fattore di ridimensionamento per evitare troppo zoom
       if (aspectRatio > imageAspectRatio) {
-        // Se la finestra è più larga rispetto al video, ridimensioniamo in altezza
-        newUV.y = newUV.y * imageAspectRatio / aspectRatio + (1.0 - imageAspectRatio / aspectRatio) * 0.5;
+        // Se la finestra è più larga rispetto al video, ridimensioniamo in altezza (con meno zoom)
+        newUV.y = newUV.y * imageAspectRatio / aspectRatio * 0.95 + (1.0 - imageAspectRatio / aspectRatio * 0.95) * 0.5;
       } else {
-        // Se la finestra è più alta rispetto al video, ridimensioniamo in larghezza
-        newUV.x = newUV.x * aspectRatio / imageAspectRatio + (1.0 - aspectRatio / imageAspectRatio) * 0.5;
+        // Se la finestra è più alta rispetto al video, ridimensioniamo in larghezza (con meno zoom)
+        newUV.x = newUV.x * aspectRatio / imageAspectRatio * 0.95 + (1.0 - aspectRatio / imageAspectRatio * 0.95) * 0.5;
       }
       
       // Uso di smoothstep per creare una transizione più fluida
