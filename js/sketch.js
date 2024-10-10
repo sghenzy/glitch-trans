@@ -111,14 +111,14 @@ class Sketch {
   this.imageAspect = this.textures[0].image.videoHeight / this.textures[0].image.videoWidth;
 
   let a1, a2;
-  if (this.camera.aspect < this.imageAspect) {
-    // Se l'aspect ratio della finestra è inferiore a quello del video, riempiamo in altezza
-    a1 = 1;
-    a2 = this.camera.aspect / this.imageAspect;
-  } else {
-    // Altrimenti, riempiamo in larghezza
-    a1 = this.imageAspect / this.camera.aspect;
+  if (this.camera.aspect > this.imageAspect) {
+    // Se l'aspect ratio della finestra è maggiore di quello del video, riempiamo in larghezza
+    a1 = this.camera.aspect / this.imageAspect;
     a2 = 1;
+  } else {
+    // Altrimenti, riempiamo in altezza
+    a1 = 1;
+    a2 = this.imageAspect / this.camera.aspect;
   }
 
   // Passiamo le dimensioni corrette allo shader
@@ -132,12 +132,13 @@ class Sketch {
   const height = 1;
   this.camera.fov = 2 * (180 / Math.PI) * Math.atan(height / (2 * dist));
 
-  // Aggiorna la scala del piano per comportarsi come object-fit: cover
+  // Aggiorna la scala del piano per occupare sempre l'intera finestra
   this.plane.scale.x = a1;
   this.plane.scale.y = a2;
 
   this.camera.updateProjectionMatrix();
-  }
+}
+
 
   addObjects() {
     let that = this;
