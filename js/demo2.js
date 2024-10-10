@@ -10,13 +10,16 @@ let sketch = new Sketch({
     uniform float progress;
     uniform sampler2D texture1;
     uniform sampler2D texture2;
-    uniform vec4 resolution;
+    uniform vec4 resolution; // x = width, y = height, z = aspect ratio correction
 
     varying vec2 vUv;
     varying vec4 vPosition;
 
     void main() {
-      vec2 newUV = (vUv - vec2(0.5)) * resolution.zw + vec2(0.5);
+      // Correggi le coordinate UV per il rapporto d'aspetto del video
+      vec2 newUV = vUv;
+      float aspectRatio = resolution.x / resolution.y;
+      newUV.x *= aspectRatio;
 
       // Applica l'effetto glitch solo durante la transizione (quando progress è tra 0 e 1)
       if (progress < 1.0 && progress > 0.0) {
