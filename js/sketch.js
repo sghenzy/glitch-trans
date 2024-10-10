@@ -198,13 +198,18 @@ class Sketch {
 
   render() {
   if (this.paused) return;
+  
+  // Aggiungi un log per monitorare il rendering
+  console.log("Rendering frame. Time:", this.time);
+  
   this.time += 0.05;
   this.material.uniforms.time.value = this.time;
 
   // Aggiorna le video texture
-  this.textures.forEach((texture) => {
+  this.textures.forEach((texture, index) => {
     if (texture) {
       texture.needsUpdate = true; // Forza l'aggiornamento della texture video
+      console.log(`Texture video ${index + 1} aggiornata`);
     }
   });
 
@@ -215,5 +220,6 @@ class Sketch {
   requestAnimationFrame(this.render.bind(this));
   this.renderer.render(this.scene, this.camera);
 }
+
 
 }
