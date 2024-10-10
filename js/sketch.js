@@ -17,7 +17,7 @@ class Sketch {
     this.clicker = document.getElementById("content");
 
     this.container = document.getElementById("slider");
-    this.videos = ['/video/reel1.webm', '/video/reel2.webm']; // Percorsi dei video
+    this.videos = ['video/reel1.webm', 'video/reel2.webm']; // Percorsi dei video
     this.width = this.container.offsetWidth;
     this.height = this.container.offsetHeight;
     this.container.appendChild(this.renderer.domElement);
