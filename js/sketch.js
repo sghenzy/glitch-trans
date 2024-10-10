@@ -35,7 +35,7 @@ class Sketch {
     this.textures = [];
 
     this.paused = true;
-    this.initiate(()=>{
+    this.initiate(() => {
       console.log(this.textures);
       this.setupResize();
       this.settings();
@@ -47,39 +47,38 @@ class Sketch {
   }
 
   initiate(cb) {
-  const promises = [];
-  let that = this;
+    const promises = [];
+    let that = this;
 
-  this.videos.forEach((url, i) => {
-    let video = document.createElement('video');
-    video.src = url;
-    video.muted = true;
-    video.autoplay = true;
-    video.loop = true;
+    this.videos.forEach((url, i) => {
+      let video = document.createElement('video');
+      video.src = url;
+      video.muted = true;
+      video.autoplay = true;
+      video.loop = true;
 
-    // Creiamo una Promise per ogni video
-    let promise = new Promise((resolve) => {
-      video.addEventListener('loadeddata', () => {
-        console.log(`Video ${i + 1} caricato: ${url}`);
-        video.play();
-        that.textures[i] = new THREE.VideoTexture(video);
-        that.textures[i].minFilter = THREE.LinearFilter;
-        that.textures[i].magFilter = THREE.LinearFilter;
-        that.textures[i].format = THREE.RGBFormat; // Imposta il formato corretto
-        resolve();  // Risolviamo la Promise quando il video è pronto
+      // Creiamo una Promise per ogni video
+      let promise = new Promise((resolve) => {
+        video.addEventListener('loadeddata', () => {
+          console.log(`Video ${i + 1} caricato: ${url}`);
+          video.play();
+          that.textures[i] = new THREE.VideoTexture(video);
+          that.textures[i].minFilter = THREE.LinearFilter;
+          that.textures[i].magFilter = THREE.LinearFilter;
+          that.textures[i].format = THREE.RGBFormat; // Imposta il formato corretto
+          resolve();  // Risolviamo la Promise quando il video è pronto
+        });
       });
+
+      promises.push(promise);
     });
 
-    promises.push(promise);
-  });
-
-  // Attendi il caricamento di tutti i video prima di procedere
-  Promise.all(promises).then(() => {
-    console.log("Tutti i video sono stati caricati correttamente.");
-    cb();
-  });
-}
-
+    // Attendi il caricamento di tutti i video prima di procedere
+    Promise.all(promises).then(() => {
+      console.log("Tutti i video sono stati caricati correttamente.");
+      cb();
+    });
+  }
 
   clickEvent() {
     this.clicker.addEventListener('click', () => {
@@ -108,7 +107,9 @@ class Sketch {
     this.renderer.setSize(this.width, this.height);
     this.camera.aspect = this.width / this.height;
 
-    this.imageAspect = this.textures[0].image.height / this.textures[0].image.width;
+    // Usa l'altezza e la larghezza del video per calcolare il rapporto d'aspetto
+    this.imageAspect = this.textures[0].image.videoHeight / this.textures[0].image.videoWidth;
+    
     let a1, a2;
     if (this.height / this.width > this.imageAspect) {
       a1 = (this.width / this.height) * this.imageAspect;
@@ -118,17 +119,20 @@ class Sketch {
       a2 = (this.height / this.width) / this.imageAspect;
     }
 
+    // Passiamo le dimensioni corrette allo shader
     this.material.uniforms.resolution.value.x = this.width;
     this.material.uniforms.resolution.value.y = this.height;
     this.material.uniforms.resolution.value.z = a1;
     this.material.uniforms.resolution.value.w = a2;
 
+    // Aggiorna il campo visivo della camera in base alla distanza
     const dist = this.camera.position.z;
     const height = 1;
     this.camera.fov = 2 * (180 / Math.PI) * Math.atan(height / (2 * dist));
 
-    this.plane.scale.x = this.camera.aspect;
-    this.plane.scale.y = 1;
+    // Aggiorna la scala del piano in base al rapporto d'aspetto
+    this.plane.scale.x = this.camera.aspect * a1;
+    this.plane.scale.y = a2;
 
     this.camera.updateProjectionMatrix();
   }
@@ -156,15 +160,21 @@ class Sketch {
         texture1: { type: "t", value: this.textures[0] }, // Primo video
         texture2: { type: "t", value: this.textures[1] }, // Secondo video
         displacement: { type: "t", value: new THREE.TextureLoader().load('img/disp1.jpg') }, // Mappa di distorsione
-        resolution: { type: "v4", value: new THREE.Vector4() },
+        resolution: { type: "v4", value: new THREE.Vector4() }, // Risoluzione e rapporto d'aspetto
       },
       vertexShader: this.vertex,
       fragmentShader: this.fragment
     });
 
+    // Crea il piano con dimensioni iniziali di 1x1
     this.geometry = new THREE.PlaneGeometry(1, 1, 2, 2);
     this.plane = new THREE.Mesh(this.geometry, this.material);
+    
+    // Aggiunge il piano alla scena
     this.scene.add(this.plane);
+
+    // Scala il piano in base alla risoluzione video
+    this.resize();
   }
 
   stop() {
@@ -197,22 +207,22 @@ class Sketch {
   }
 
   render() {
-  if (this.paused) return;
-  this.time += 0.05;
-  this.material.uniforms.time.value = this.time;
+    if (this.paused) return;
+    this.time += 0.05;
+    this.material.uniforms.time.value = this.time;
 
-  // Aggiorna le video texture
-  this.textures.forEach((texture) => {
-    if (texture) {
-      texture.needsUpdate = true; // Forza l'aggiornamento della texture video
-    }
-  });
+    // Aggiorna le video texture
+    this.textures.forEach((texture) => {
+      if (texture) {
+        texture.needsUpdate = true; // Forza l'aggiornamento della texture video
+      }
+    });
 
-  Object.keys(this.uniforms).forEach((item) => {
-    this.material.uniforms[item].value = this.settings[item];
-  });
+    Object.keys(this.uniforms).forEach((item) => {
+      this.material.uniforms[item].value = this.settings[item];
+    });
 
-  requestAnimationFrame(this.render.bind(this));
-  this.renderer.render(this.scene, this.camera);
-}
+    requestAnimationFrame(this.render.bind(this));
+    this.renderer.render(this.scene, this.camera);
+  }
 }
