@@ -15,23 +15,24 @@ let sketch = new Sketch({
     varying vec2 vUv;
 
     void main() {
-      // Corregge le coordinate UV per centrare il video senza distorsioni
+      // Mantiene le UV corrette per centrare il video senza distorsioni
       vec2 newUV = (vUv - vec2(0.5)) * resolution.zw + vec2(0.5);
-
+      
       // Variabili per la progressione
       vec2 p = newUV;
       float x = progress;
 
-      // Correzione dell'aspect ratio del video
+      // Calcola l'aspect ratio della finestra e del video
       float aspectRatio = resolution.x / resolution.y;
       float imageAspectRatio = resolution.z / resolution.w;
 
+      // Corregge le coordinate UV per mantenere il video centrato
       if (aspectRatio > imageAspectRatio) {
-        // La finestra è più larga rispetto al video
-        newUV.y *= imageAspectRatio / aspectRatio;
+        // Se la finestra è più larga del video, ridimensiona l'altezza
+        newUV.y = newUV.y * imageAspectRatio / aspectRatio + (1.0 - imageAspectRatio / aspectRatio) * 0.5;
       } else {
-        // La finestra è più alta rispetto al video
-        newUV.x *= aspectRatio / imageAspectRatio;
+        // Se la finestra è più alta del video, ridimensiona la larghezza
+        newUV.x = newUV.x * aspectRatio / imageAspectRatio + (1.0 - aspectRatio / imageAspectRatio) * 0.5;
       }
       
       // Uso di smoothstep per creare una transizione più fluida
