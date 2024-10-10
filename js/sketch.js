@@ -135,8 +135,7 @@ class Sketch {
   this.plane.scale.y = a2 * Math.max(1, this.camera.aspect);
 
   this.camera.updateProjectionMatrix();
-}
-
+  }
 
   addObjects() {
     let that = this;
