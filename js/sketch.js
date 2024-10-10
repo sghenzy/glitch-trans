@@ -140,6 +140,7 @@ class Sketch {
 }
 
 
+
   addObjects() {
     let that = this;
 
