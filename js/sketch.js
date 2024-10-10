@@ -47,27 +47,39 @@ class Sketch {
   }
 
   initiate(cb) {
-    const promises = [];
-    let that = this;
+  const promises = [];
+  let that = this;
 
-    // Carica i video al posto delle immagini
-    this.videos.forEach((url, i) => {
-      let video = document.createElement('video');
-      video.src = url;
-      video.muted = true;
-      video.autoplay = true;
-      video.loop = true;
-      video.play();
+  this.videos.forEach((url, i) => {
+    let video = document.createElement('video');
+    video.src = url;
+    video.muted = true;
+    video.autoplay = true;
+    video.loop = true;
 
-      // Crea una VideoTexture per ogni video
-      that.textures[i] = new THREE.VideoTexture(video);
+    // Creiamo una Promise per ogni video
+    let promise = new Promise((resolve) => {
+      video.addEventListener('loadeddata', () => {
+        console.log(`Video ${i + 1} caricato: ${url}`);
+        video.play();
+        that.textures[i] = new THREE.VideoTexture(video);
+        that.textures[i].minFilter = THREE.LinearFilter;
+        that.textures[i].magFilter = THREE.LinearFilter;
+        that.textures[i].format = THREE.RGBFormat; // Imposta il formato corretto
+        resolve();  // Risolviamo la Promise quando il video è pronto
+      });
     });
 
-    // Usa una Promise
-    Promise.all(promises).then(() => {
-      cb();
-    });
-  }
+    promises.push(promise);
+  });
+
+  // Attendi il caricamento di tutti i video prima di procedere
+  Promise.all(promises).then(() => {
+    console.log("Tutti i video sono stati caricati correttamente.");
+    cb();
+  });
+}
+
 
   clickEvent() {
     this.clicker.addEventListener('click', () => {
