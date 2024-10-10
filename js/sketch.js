@@ -47,27 +47,31 @@ class Sketch {
   }
 
   initiate(cb) {
-    const promises = [];
-    let that = this;
+  const promises = [];
+  let that = this;
 
-    // Carica i video al posto delle immagini
-    this.videos.forEach((url, i) => {
-      let video = document.createElement('video');
-      video.src = url;
-      video.muted = true;
-      video.autoplay = true;
-      video.loop = true;
+  this.videos.forEach((url, i) => {
+    let video = document.createElement('video');
+    video.src = url;
+    video.muted = true;
+    video.autoplay = true;
+    video.loop = true;
+
+    // Aggiungi un listener per verificare quando il video è pronto
+    video.addEventListener('loadeddata', () => {
+      console.log(`Video ${i + 1} caricato: ${url}`);
       video.play();
-
-      // Crea una VideoTexture per ogni video
       that.textures[i] = new THREE.VideoTexture(video);
+      resolve();
     });
 
-    // Usa una Promise per essere sicuri che tutti i video siano pronti prima di continuare
-    Promise.all(promises).then(() => {
-      cb();
-    });
-  }
+    promises.push(new Promise((resolve) => {}));
+  });
+
+  Promise.all(promises).then(() => {
+    cb();
+  });
+}
 
   clickEvent() {
     this.clicker.addEventListener('click', () => {
