@@ -47,34 +47,27 @@ class Sketch {
   }
 
   initiate(cb) {
-  const promises = [];
-  let that = this;
+    const promises = [];
+    let that = this;
 
-  this.videos.forEach((url, i) => {
-    let video = document.createElement('video');
-    video.src = url;
-    video.muted = true;
-    video.autoplay = true;
-    video.loop = true;
-
-    video.addEventListener('loadeddata', () => {
-      console.log(`Video ${i + 1} caricato: ${url}`);
+    // Carica i video al posto delle immagini
+    this.videos.forEach((url, i) => {
+      let video = document.createElement('video');
+      video.src = url;
+      video.muted = true;
+      video.autoplay = true;
+      video.loop = true;
       video.play();
+
+      // Crea una VideoTexture per ogni video
       that.textures[i] = new THREE.VideoTexture(video);
-      that.textures[i].minFilter = THREE.LinearFilter; // Assicurati che le texture video siano correttamente filtrate
-      that.textures[i].magFilter = THREE.LinearFilter;
-      resolve();
     });
 
-    promises.push(new Promise((resolve) => {}));
-  });
-
-  Promise.all(promises).then(() => {
-    console.log("Tutti i video sono stati caricati correttamente.");
-    cb();
-  });
-}
-
+    // Usa una Promise
+    Promise.all(promises).then(() => {
+      cb();
+    });
+  }
 
   clickEvent() {
     this.clicker.addEventListener('click', () => {
@@ -192,23 +185,15 @@ class Sketch {
   }
 
   render() {
-  if (this.paused) return;
-  this.time += 0.05;
-  this.material.uniforms.time.value = this.time;
+    if (this.paused) return;
+    this.time += 0.05;
+    this.material.uniforms.time.value = this.time;
 
-  // Aggiorna le video texture
-  this.textures.forEach((texture) => {
-    if (texture) {
-      texture.needsUpdate = true;
-    }
-  });
+    Object.keys(this.uniforms).forEach((item) => {
+      this.material.uniforms[item].value = this.settings[item];
+    });
 
-  Object.keys(this.uniforms).forEach((item) => {
-    this.material.uniforms[item].value = this.settings[item];
-  });
-
-  requestAnimationFrame(this.render.bind(this));
-  this.renderer.render(this.scene, this.camera);
-}
-
+    requestAnimationFrame(this.render.bind(this));
+    this.renderer.render(this.scene, this.camera);
+  }
 }
