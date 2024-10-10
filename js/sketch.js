@@ -102,40 +102,40 @@ class Sketch {
   }
 
   resize() {
-    this.width = this.container.offsetWidth;
-    this.height = this.container.offsetHeight;
-    this.renderer.setSize(this.width, this.height);
-    this.camera.aspect = this.width / this.height;
+  this.width = this.container.offsetWidth;
+  this.height = this.container.offsetHeight;
+  this.renderer.setSize(this.width, this.height);
+  this.camera.aspect = this.width / this.height;
 
-    // Usa l'altezza e la larghezza del video per calcolare il rapporto d'aspetto
-    this.imageAspect = this.textures[0].image.videoHeight / this.textures[0].image.videoWidth;
-    
-    let a1, a2;
-    if (this.height / this.width > this.imageAspect) {
-      a1 = (this.width / this.height) * this.imageAspect;
-      a2 = 1;
-    } else {
-      a1 = 1;
-      a2 = (this.height / this.width) / this.imageAspect;
-    }
-
-    // Passiamo le dimensioni corrette allo shader
-    this.material.uniforms.resolution.value.x = this.width;
-    this.material.uniforms.resolution.value.y = this.height;
-    this.material.uniforms.resolution.value.z = a1;
-    this.material.uniforms.resolution.value.w = a2;
-
-    // Aggiorna il campo visivo della camera in base alla distanza
-    const dist = this.camera.position.z;
-    const height = 1;
-    this.camera.fov = 2 * (180 / Math.PI) * Math.atan(height / (2 * dist));
-
-    // Aggiorna la scala del piano in base al rapporto d'aspetto
-    this.plane.scale.x = this.camera.aspect * a1;
-    this.plane.scale.y = a2;
-
-    this.camera.updateProjectionMatrix();
+  // Usa l'altezza e la larghezza del video per calcolare il rapporto d'aspetto
+  this.imageAspect = this.textures[0].image.videoHeight / this.textures[0].image.videoWidth;
+  
+  let a1, a2;
+  if (this.height / this.width > this.imageAspect) {
+    a1 = (this.width / this.height) * this.imageAspect;
+    a2 = 1;
+  } else {
+    a1 = 1;
+    a2 = (this.height / this.width) / this.imageAspect;
   }
+
+  // Passiamo le dimensioni corrette allo shader
+  this.material.uniforms.resolution.value.x = this.width;
+  this.material.uniforms.resolution.value.y = this.height;
+  this.material.uniforms.resolution.value.z = a1;
+  this.material.uniforms.resolution.value.w = a2;
+
+  // Aggiorna il campo visivo della camera in base alla distanza
+  const dist = this.camera.position.z;
+  const height = 1;
+  this.camera.fov = 2 * (180 / Math.PI) * Math.atan(height / (2 * dist));
+
+  // Aggiorna la scala del piano per riempire la finestra correttamente
+  this.plane.scale.x = a1;
+  this.plane.scale.y = a2;
+
+  this.camera.updateProjectionMatrix();
+}
 
   addObjects() {
     let that = this;
