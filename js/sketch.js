@@ -192,15 +192,23 @@ class Sketch {
   }
 
   render() {
-    if (this.paused) return;
-    this.time += 0.05;
-    this.material.uniforms.time.value = this.time;
+  if (this.paused) return;
+  this.time += 0.05;
+  this.material.uniforms.time.value = this.time;
 
-    Object.keys(this.uniforms).forEach((item) => {
-      this.material.uniforms[item].value = this.settings[item];
-    });
+  // Aggiorna le video texture
+  this.textures.forEach((texture) => {
+    if (texture) {
+      texture.needsUpdate = true;
+    }
+  });
 
-    requestAnimationFrame(this.render.bind(this));
-    this.renderer.render(this.scene, this.camera);
-  }
+  Object.keys(this.uniforms).forEach((item) => {
+    this.material.uniforms[item].value = this.settings[item];
+  });
+
+  requestAnimationFrame(this.render.bind(this));
+  this.renderer.render(this.scene, this.camera);
+}
+
 }
