@@ -63,7 +63,7 @@ class Sketch {
       that.textures[i] = new THREE.VideoTexture(video);
     });
 
-    // Usa una Promise per essere sicuri che tutti i video siano pronti prima di continuare
+    // Usa una Promise
     Promise.all(promises).then(() => {
       cb();
     });
