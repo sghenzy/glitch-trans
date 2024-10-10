@@ -17,14 +17,14 @@ let sketch = new Sketch({
     void main() {
       vec2 newUV = vUv;
 
-      // Corregge l'aspetto del video
+      // Adatta le coordinate UV per evitare distorsioni
       float aspectRatio = resolution.x / resolution.y;
       newUV.x = (vUv.x - 0.5) * aspectRatio + 0.5;
 
-      // Applica glitch solo durante la transizione
+      // Applica l'effetto glitch solo durante la transizione
       if (progress < 1.0 && progress > 0.0) {
-        newUV.x += sin(newUV.y * 10.0 + time * 5.0) * 0.05;
-        newUV.y += cos(newUV.x * 10.0 + time * 5.0) * 0.05;
+        newUV.x += sin(newUV.y * 10.0 + time * 5.0) * 0.02;
+        newUV.y += cos(newUV.x * 10.0 + time * 5.0) * 0.02;
       }
 
       // Miscelazione tra i due video in base al progresso
