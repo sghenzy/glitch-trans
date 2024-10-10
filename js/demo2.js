@@ -19,7 +19,7 @@ let sketch = new Sketch({
       vec2 newUV = vUv;
 
       // Variabile per l'intensità della distorsione glitch
-      float glitchStrength = 0.3;
+      float glitchStrength = 0.2;
 
       // Applica glitch solo durante la transizione
       if (progress < 1.0 && progress > 0.0) {
