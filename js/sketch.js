@@ -109,30 +109,32 @@ class Sketch {
 
   // Usa l'altezza e la larghezza del video per calcolare il rapporto d'aspetto
   this.imageAspect = this.textures[0].image.videoHeight / this.textures[0].image.videoWidth;
-  
+
   let a1, a2;
-  if (this.height / this.width > this.imageAspect) {
-    a1 = (this.width / this.height) * this.imageAspect;
-    a2 = 1;
-  } else {
+  if (this.camera.aspect < this.imageAspect) {
+    // Se l'aspect ratio della finestra è inferiore a quello del video, riempiamo in altezza
     a1 = 1;
-    a2 = (this.height / this.width) / this.imageAspect;
+    a2 = this.camera.aspect / this.imageAspect;
+  } else {
+    // Altrimenti, riempiamo in larghezza
+    a1 = this.imageAspect / this.camera.aspect;
+    a2 = 1;
   }
 
   // Passiamo le dimensioni corrette allo shader
   this.material.uniforms.resolution.value.x = this.width;
   this.material.uniforms.resolution.value.y = this.height;
-  this.material.uniforms.resolution.value.z = a1;
-  this.material.uniforms.resolution.value.w = a2;
+  this.material.uniforms.resolution.value.z = a1; // Rapporto d'aspetto corretto
+  this.material.uniforms.resolution.value.w = a2; // Rapporto d'aspetto corretto
 
   // Aggiorna il campo visivo della camera in base alla distanza
   const dist = this.camera.position.z;
   const height = 1;
   this.camera.fov = 2 * (180 / Math.PI) * Math.atan(height / (2 * dist));
 
-  // Aggiorna la scala del piano per coprire tutta la finestra
-  this.plane.scale.x = this.camera.aspect * a1;
-  this.plane.scale.y = a2 * Math.max(1, this.camera.aspect);
+  // Aggiorna la scala del piano per comportarsi come object-fit: cover
+  this.plane.scale.x = a1;
+  this.plane.scale.y = a2;
 
   this.camera.updateProjectionMatrix();
   }
