@@ -130,12 +130,13 @@ class Sketch {
   const height = 1;
   this.camera.fov = 2 * (180 / Math.PI) * Math.atan(height / (2 * dist));
 
-  // Aggiorna la scala del piano per riempire la finestra correttamente
-  this.plane.scale.x = a1;
-  this.plane.scale.y = a2;
+  // Aggiorna la scala del piano per coprire tutta la finestra
+  this.plane.scale.x = this.camera.aspect * a1;
+  this.plane.scale.y = a2 * Math.max(1, this.camera.aspect);
 
   this.camera.updateProjectionMatrix();
 }
+
 
   addObjects() {
     let that = this;
