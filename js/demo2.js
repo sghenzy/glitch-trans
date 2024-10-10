@@ -15,23 +15,17 @@ let sketch = new Sketch({
     varying vec2 vUv;
 
     void main() {
+      // Mappa le coordinate UV in modo da coprire tutta la finestra senza distorsioni
       vec2 newUV = vUv;
 
-      // Adatta le coordinate UV per evitare distorsioni
-      float aspectRatio = resolution.x / resolution.y;
-      newUV.x = (vUv.x - 0.5) * aspectRatio + 0.5;
+      // Non applichiamo distorsioni sui bordi
+      newUV = vUv;
 
-      // Applica l'effetto glitch solo durante la transizione
-      if (progress < 1.0 && progress > 0.0) {
-        newUV.x += sin(newUV.y * 10.0 + time * 5.0) * 0.02;
-        newUV.y += cos(newUV.x * 10.0 + time * 5.0) * 0.02;
-      }
-
-      // Miscelazione tra i due video in base al progresso
+      // Interpolazione tra i due video
       vec4 color1 = texture2D(texture1, newUV);
       vec4 color2 = texture2D(texture2, newUV);
 
-      // Interpolazione finale tra i video
+      // Miscelazione finale tra i video in base al progresso della transizione
       vec4 finalColor = mix(color1, color2, progress);
 
       gl_FragColor = finalColor;
