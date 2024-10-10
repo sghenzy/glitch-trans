@@ -107,14 +107,16 @@ class Sketch {
   this.renderer.setSize(this.width, this.height);
   this.camera.aspect = this.width / this.height;
 
-  // Usa l'altezza e la larghezza del video per calcolare il rapporto d'aspetto
+  // Calcola il rapporto d'aspetto del video
   this.imageAspect = this.textures[0].image.videoHeight / this.textures[0].image.videoWidth;
-  
+
   let a1, a2;
   if (this.height / this.width > this.imageAspect) {
+    // Se la finestra è più alta rispetto al video
     a1 = (this.width / this.height) * this.imageAspect;
     a2 = 1;
   } else {
+    // Se la finestra è più larga rispetto al video
     a1 = 1;
     a2 = (this.height / this.width) / this.imageAspect;
   }
@@ -130,12 +132,20 @@ class Sketch {
   const height = 1;
   this.camera.fov = 2 * (180 / Math.PI) * Math.atan(height / (2 * dist));
 
-  // Aggiorna la scala del piano per coprire tutta la finestra
-  this.plane.scale.x = this.camera.aspect * a1;
-  this.plane.scale.y = a2 * Math.max(1, this.camera.aspect);
+  // Imposta la scala del piano per comportarsi come 'object-fit: cover'
+  if (this.camera.aspect > this.imageAspect) {
+    // Riempie in larghezza e ritaglia in altezza
+    this.plane.scale.x = this.camera.aspect / this.imageAspect;
+    this.plane.scale.y = 1;
+  } else {
+    // Riempie in altezza e ritaglia in larghezza
+    this.plane.scale.x = 1;
+    this.plane.scale.y = this.imageAspect / this.camera.aspect;
+  }
 
   this.camera.updateProjectionMatrix();
 }
+
 
   addObjects() {
     let that = this;
