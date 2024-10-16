@@ -35,15 +35,15 @@ let sketch = new Sketch({
         newUV.x = newUV.x * aspectRatio / imageAspectRatio * 0.85 + (1.0 - aspectRatio / imageAspectRatio * 0.85) * 0.5;
       }
 
-      // Effetto glitch (distorsione casuale)
-      float glitch = sin(time * 10.0) * 0.05 * progress; // Distorsione glitch casuale basata su sinusoide
-      vec2 glitchOffset = vec2(glitch, 0.0);
-      
-      // Applichiamo il glitch solo durante la transizione
-      vec4 color1 = texture2D(texture1, newUV + glitchOffset);
-      vec4 color2 = texture2D(texture2, newUV - glitchOffset);
-      
-      // Mix dei due video con effetto glitch
+      // Effetto di pixelazione durante la transizione
+      float pixelSize = mix(1.0, 20.0, progress); // I pixel diventano più grandi durante la transizione
+      vec2 pixelatedUV = floor(newUV * pixelSize) / pixelSize; // Griglia dei pixel per l'effetto
+
+      // Interpolazione tra i due video
+      vec4 color1 = texture2D(texture1, pixelatedUV);
+      vec4 color2 = texture2D(texture2, pixelatedUV);
+
+      // Uso di smoothstep per creare una transizione fluida
       vec4 finalColor = mix(color1, color2, smoothstep(0.0, 1.0, progress));
 
       gl_FragColor = finalColor;
