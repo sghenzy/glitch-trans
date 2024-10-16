@@ -4,13 +4,7 @@ let sketch = new Sketch({
   easing: 'easeOut',
   uniforms: {
     width: { value: 0.5, type: 'f', min: 0, max: 10 },
-    displacementFactor: { value: 0.3, type: 'f', min: 0, max: 1 },
-    progress: { value: 0, type: 'f' },  // Inizializza progress
-    time: { value: 0, type: 'f' },  // Inizializza il tempo
-    texture1: { value: null, type: 't' },  // Placeholder per texture1
-    texture2: { value: null, type: 't' },  // Placeholder per texture2
-    displacementMap: { value: null, type: 't' },  // Placeholder per la mappa di displacement
-    resolution: { value: new THREE.Vector4(), type: 'v4' },  // Inizializza la risoluzione
+    displacementFactor: { value: 0.3, type: 'f', min: 0, max: 1 }, // Controllo dell'intensità della distorsione
   },
   fragment: `
     uniform float time;
