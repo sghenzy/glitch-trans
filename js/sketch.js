@@ -219,9 +219,11 @@ addObjects() {
       }
     });
 
-    Object.keys(this.uniforms).forEach((item) => {
-      this.material.uniforms[item].value = this.settings[item];
-    });
+    Object.keys(this.material.uniforms).forEach((item) => {
+      if (this.material.uniforms[item] && this.settings[item] !== undefined) {
+        this.material.uniforms[item].value = this.settings[item];
+      }
+    });    
 
     requestAnimationFrame(this.render.bind(this));
     this.renderer.render(this.scene, this.camera);
