@@ -4,13 +4,6 @@ let sketch = new Sketch({
   easing: 'easeOut',
   uniforms: {
     width: { value: 0.5, type: 'f', min: 0, max: 10 },
-    displacementFactor: { value: 0.3, type: 'f', min: 0, max: 1 },
-    progress: { value: 0, type: 'f' },  // Inizializza progress
-    time: { value: 0, type: 'f' },  // Inizializza il tempo
-    texture1: { value: null, type: 't' },  // Placeholder per texture1
-    texture2: { value: null, type: 't' },  // Placeholder per texture2
-    displacementMap: { value: null, type: 't' },  // Placeholder per la mappa di displacement
-    resolution: { value: new THREE.Vector4(), type: 'v4' },  // Inizializza la risoluzione
   },
   fragment: `
     uniform float time;
@@ -18,30 +11,40 @@ let sketch = new Sketch({
     uniform sampler2D texture1;
     uniform sampler2D texture2;
     uniform vec4 resolution;
-    uniform sampler2D displacementMap;  // La mappa di displacement
-    uniform float displacementFactor;   // Fattore di distorsione
 
     varying vec2 vUv;
 
     void main() {
       // Manteniamo le UV corrette per centrare il video senza distorsioni
       vec2 newUV = (vUv - vec2(0.5)) * resolution.zw + vec2(0.5);
+      
+      // Variabili per la progressione
+      vec2 p = newUV;
+      float x = progress;
 
-      // Applichiamo la distorsione solo durante la transizione
-      vec2 displacement = texture2D(displacementMap, vUv).rg * displacementFactor * progress; 
-      vec2 displacedUV = newUV + displacement;
+      // Calcolo dell'aspect ratio della finestra e del video
+      float aspectRatio = resolution.x / resolution.y;
+      float imageAspectRatio = resolution.z / resolution.w;
 
-      // Progressione della transizione (orizzontale)
-      float x = smoothstep(0.0, 1.0, (progress * 2.0 + displacedUV.x - 1.0));
+      // Riduciamo ulteriormente il fattore di ridimensionamento (zoom ancora più basso)
+      if (aspectRatio > imageAspectRatio) {
+        // Se la finestra è più larga rispetto al video, ridimensioniamo in altezza (con meno zoom)
+        newUV.y = newUV.y * imageAspectRatio / aspectRatio * 0.85 + (1.0 - imageAspectRatio / aspectRatio * 0.85) * 0.5;
+      } else {
+        // Se la finestra è più alta rispetto al video, ridimensioniamo in larghezza (con meno zoom)
+        newUV.x = newUV.x * aspectRatio / imageAspectRatio * 0.85 + (1.0 - aspectRatio / imageAspectRatio * 0.85) * 0.5;
+      }
+      
+      // Uso di smoothstep per creare una transizione più fluida
+      x = smoothstep(0.0, 1.0, (x * 2.0 + p.y - 1.0));
       
       // Interpolazione tra i due video
       vec4 f = mix(
-        texture2D(texture1, (displacedUV - 0.5) * (1.0 - x) + 0.5), 
-        texture2D(texture2, (displacedUV - 0.5) * x + 0.5), 
+        texture2D(texture1, (newUV - 0.5) * (1.0 - x) + 0.5), 
+        texture2D(texture2, (newUV - 0.5) * x + 0.5), 
         x
       );
-
-      // Output finale del colore
+      
       gl_FragColor = f;
     }
   `
