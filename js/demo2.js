@@ -36,7 +36,7 @@ let sketch = new Sketch({
       }
       
       // Uso di smoothstep per creare una transizione più fluida
-      x = smoothstep(0.0, 1.0, (x * 2.0 + p.x - 1.0));
+      x = smoothstep(0.0, 1.0, (x * 2.0 + p.y - 1.0));
       
       // Interpolazione tra i due video
       vec4 f = mix(
