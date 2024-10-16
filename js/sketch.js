@@ -102,80 +102,83 @@ class Sketch {
   }
 
   resize() {
-    this.width = this.container.offsetWidth;
-    this.height = this.container.offsetHeight;
-    this.renderer.setSize(this.width, this.height);
-    this.camera.aspect = this.width / this.height;
-  
-    // Calcola il rapporto d'aspetto del video
-    this.imageAspect = this.textures[0].image.videoHeight / this.textures[0].image.videoWidth;
-  
-    let a1, a2;
-    if (this.height / this.width > this.imageAspect) {
-      a1 = (this.width / this.height) * this.imageAspect;
-      a2 = 1;
-    } else {
-      a1 = 1;
-      a2 = (this.height / this.width) / this.imageAspect;
-    }
-  
-    // Passiamo le dimensioni corrette allo shader
-    this.material.uniforms.resolution.value.x = this.width;
-    this.material.uniforms.resolution.value.y = this.height;
-    this.material.uniforms.resolution.value.z = a1;
-    this.material.uniforms.resolution.value.w = a2;
-  
-    // Imposta la scala del piano per comportarsi come 'object-fit: cover'
-    const dist = this.camera.position.z;
-    const height = 1;
-    this.camera.fov = 2 * (180 / Math.PI) * Math.atan(height / (2 * dist));
-  
-    if (this.camera.aspect > this.imageAspect) {
-      this.plane.scale.x = this.camera.aspect / this.imageAspect;
-      this.plane.scale.y = 1;
-    } else {
-      this.plane.scale.x = 1;
-      this.plane.scale.y = this.imageAspect / this.camera.aspect;
-    }
-  
-    this.camera.updateProjectionMatrix();
+  this.width = this.container.offsetWidth;
+  this.height = this.container.offsetHeight;
+  this.renderer.setSize(this.width, this.height);
+  this.camera.aspect = this.width / this.height;
+
+  // Calcola il rapporto d'aspetto del video
+  this.imageAspect = this.textures[0].image.videoHeight / this.textures[0].image.videoWidth;
+
+  let a1, a2;
+  if (this.height / this.width > this.imageAspect) {
+    // Se la finestra è più alta rispetto al video
+    a1 = (this.width / this.height) * this.imageAspect;
+    a2 = 1;
+  } else {
+    // Se la finestra è più larga rispetto al video
+    a1 = 1;
+    a2 = (this.height / this.width) / this.imageAspect;
   }
-  
 
+  // Passiamo le dimensioni corrette allo shader
+  this.material.uniforms.resolution.value.x = this.width;
+  this.material.uniforms.resolution.value.y = this.height;
+  this.material.uniforms.resolution.value.z = a1;
+  this.material.uniforms.resolution.value.w = a2;
 
-addObjects() {
-  let that = this;
+  // Aggiorna il campo visivo della camera in base alla distanza
+  const dist = this.camera.position.z;
+  const height = 1;
+  this.camera.fov = 2 * (180 / Math.PI) * Math.atan(height / (2 * dist));
 
-  // Crea il materiale per lo shader con le VideoTexture
-  this.material = new THREE.ShaderMaterial({
-    extensions: {
-      derivatives: "#extension GL_OES_standard_derivatives : enable"
-    },
-    side: THREE.DoubleSide,
-    uniforms: {
-      time: { type: "f", value: 0 },
-      progress: { type: "f", value: 0 },
-      displacementFactor: { type: "f", value: 0.3 },  // Controllo dell'intensità della distorsione
-      texture1: { type: "t", value: this.textures[0] }, // Primo video
-      texture2: { type: "t", value: this.textures[1] }, // Secondo video
-      displacementMap: { type: "t", value: new THREE.TextureLoader().load('img/disp1.jpg') }, // Mappa di displacement
-      resolution: { type: "v4", value: new THREE.Vector4() }, // Risoluzione e rapporto d'aspetto
-    },
-    vertexShader: this.vertex,
-    fragmentShader: this.fragment
-  });
+  // Imposta la scala del piano per comportarsi come 'object-fit: cover'
+  if (this.camera.aspect > this.imageAspect) {
+    // Riempie in larghezza e ritaglia in altezza
+    this.plane.scale.x = this.camera.aspect / this.imageAspect;
+    this.plane.scale.y = 1;
+  } else {
+    // Riempie in altezza e ritaglia in larghezza
+    this.plane.scale.x = 1;
+    this.plane.scale.y = this.imageAspect / this.camera.aspect;
+  }
 
-  // Crea il piano con dimensioni iniziali di 1x1
-  this.geometry = new THREE.PlaneGeometry(1, 1, 2, 2);
-  this.plane = new THREE.Mesh(this.geometry, this.material);
-
-  // Aggiunge il piano alla scena
-  this.scene.add(this.plane);
-
-  // Scala il piano in base alla risoluzione video
-  this.resize();
+  this.camera.updateProjectionMatrix();
 }
 
+
+  addObjects() {
+    let that = this;
+
+    // Crea il materiale per lo shader con le VideoTexture
+    this.material = new THREE.ShaderMaterial({
+      extensions: {
+        derivatives: "#extension GL_OES_standard_derivatives : enable"
+      },
+      side: THREE.DoubleSide,
+      uniforms: {
+        time: { type: "f", value: 0 },
+        progress: { type: "f", value: 0 },
+        displacementFactor: { type: "f", value: 0.3 },  // Fattore di distorsione
+        texture1: { type: "t", value: this.textures[0] },
+        texture2: { type: "t", value: this.textures[1] },
+        displacementMap: { type: "t", value: new THREE.TextureLoader().load('img/disp1.jpg') }, // Carica la mappa di displacement
+        resolution: { type: "v4", value: new THREE.Vector4() } // Risoluzione e aspetto
+      },
+      vertexShader: this.vertex,
+      fragmentShader: this.fragment
+    });    
+
+    // Crea il piano con dimensioni iniziali di 1x1
+    this.geometry = new THREE.PlaneGeometry(1, 1, 2, 2);
+    this.plane = new THREE.Mesh(this.geometry, this.material);
+    
+    // Aggiunge il piano alla scena
+    this.scene.add(this.plane);
+
+    // Scala il piano in base alla risoluzione video
+    this.resize();
+  }
 
   stop() {
     this.paused = true;
@@ -205,25 +208,31 @@ addObjects() {
       }
     });
   }
-  
 
   render() {
     if (this.paused) return;
     this.time += 0.05;
+  
+    // Aggiorna l'uniforme tempo
     this.material.uniforms.time.value = this.time;
-
+  
     // Aggiorna le video texture
     this.textures.forEach((texture) => {
       if (texture) {
-        texture.needsUpdate = true; // Forza l'aggiornamento della texture video
+        texture.needsUpdate = true;
       }
     });
-
-    Object.keys(this.uniforms).forEach((item) => {
-      this.material.uniforms[item].value = this.settings[item];
+  
+    // Se hai impostato controlli per gli uniforms, aggiorna direttamente gli uniforms del materiale
+    Object.keys(this.material.uniforms).forEach((item) => {
+      if (this.settings[item] !== undefined) {
+        this.material.uniforms[item].value = this.settings[item];
+      }
     });
-
+  
     requestAnimationFrame(this.render.bind(this));
     this.renderer.render(this.scene, this.camera);
   }
+  
+  
 }

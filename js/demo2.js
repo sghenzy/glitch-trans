@@ -4,7 +4,7 @@ let sketch = new Sketch({
   easing: 'easeOut',
   uniforms: {
     width: { value: 0.5, type: 'f', min: 0, max: 10 },
-    displacementFactor: { value: 0.3, type: 'f', min: 0, max: 1 }, // Controllo dell'intensità della distorsione
+    displacementFactor: { value: 0.3, type: 'f', min: 0, max: 1 },
   },
   fragment: `
     uniform float time;
@@ -20,9 +20,9 @@ let sketch = new Sketch({
     void main() {
       // Manteniamo le UV corrette per centrare il video senza distorsioni
       vec2 newUV = (vUv - vec2(0.5)) * resolution.zw + vec2(0.5);
-
-      // Applichiamo la distorsione solo durante la transizione
-      vec2 displacement = texture2D(displacementMap, vUv).rg * displacementFactor * progress; 
+      
+      // Applichiamo la distorsione usando la mappa di displacement
+      vec2 displacement = texture2D(displacementMap, vUv).rg * displacementFactor; 
       vec2 displacedUV = newUV + displacement;
 
       // Progressione della transizione (orizzontale)
