@@ -34,18 +34,19 @@ let sketch = new Sketch({
         // Se la finestra è più alta rispetto al video, ridimensioniamo in larghezza (con meno zoom)
         newUV.x = newUV.x * aspectRatio / imageAspectRatio * 0.85 + (1.0 - aspectRatio / imageAspectRatio * 0.85) * 0.5;
       }
+
+      // Effetto glitch (distorsione casuale)
+      float glitch = sin(time * 10.0) * 0.05 * progress; // Distorsione glitch casuale basata su sinusoide
+      vec2 glitchOffset = vec2(glitch, 0.0);
       
-      // Uso di smoothstep per creare una transizione più fluida
-      x = smoothstep(0.0, 1.0, (x * 2.0 + p.y - 1.0));
+      // Applichiamo il glitch solo durante la transizione
+      vec4 color1 = texture2D(texture1, newUV + glitchOffset);
+      vec4 color2 = texture2D(texture2, newUV - glitchOffset);
       
-      // Interpolazione tra i due video
-      vec4 f = mix(
-        texture2D(texture1, (newUV - 0.5) * (1.0 - x) + 0.5), 
-        texture2D(texture2, (newUV - 0.5) * x + 0.5), 
-        x
-      );
-      
-      gl_FragColor = f;
+      // Mix dei due video con effetto glitch
+      vec4 finalColor = mix(color1, color2, smoothstep(0.0, 1.0, progress));
+
+      gl_FragColor = finalColor;
     }
   `
 });
