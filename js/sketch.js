@@ -212,26 +212,20 @@ class Sketch {
   render() {
     if (this.paused) return;
     this.time += 0.05;
-  
-    // Assicurati di aggiornare direttamente gli uniforms del materiale
     this.material.uniforms.time.value = this.time;
-  
+
     // Aggiorna le video texture
     this.textures.forEach((texture) => {
       if (texture) {
         texture.needsUpdate = true; // Forza l'aggiornamento della texture video
       }
     });
-  
-    // Aggiorna gli uniforms direttamente dal materiale
-    Object.keys(this.material.uniforms).forEach((item) => {
-      if (this.settings[item] !== undefined) {
-        this.material.uniforms[item].value = this.settings[item];
-      }
+
+    Object.keys(this.uniforms).forEach((item) => {
+      this.material.uniforms[item].value = this.settings[item];
     });
-  
+
     requestAnimationFrame(this.render.bind(this));
     this.renderer.render(this.scene, this.camera);
   }
-  
 }
