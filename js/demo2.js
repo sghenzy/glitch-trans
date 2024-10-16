@@ -17,31 +17,29 @@ let sketch = new Sketch({
     void main() {
       // Manteniamo le UV corrette per centrare il video senza distorsioni
       vec2 newUV = (vUv - vec2(0.5)) * resolution.zw + vec2(0.5);
-
-      // Variabili per la progressione
-      vec2 p = newUV;
-      float x = progress;
-
+      
       // Calcolo dell'aspect ratio della finestra e del video
       float aspectRatio = resolution.x / resolution.y;
       float imageAspectRatio = resolution.z / resolution.w;
 
-      // Ridimensionamento senza zoom aggiuntivo
+      // Manteniamo le UV senza distorsioni
       if (aspectRatio > imageAspectRatio) {
         newUV.y = newUV.y * imageAspectRatio / aspectRatio + (1.0 - imageAspectRatio / aspectRatio) * 0.5;
       } else {
         newUV.x = newUV.x * aspectRatio / imageAspectRatio + (1.0 - aspectRatio / imageAspectRatio) * 0.5;
       }
+      
+      // Definisce la pixelatura durante la transizione: parte da 1 (nessuna pixelatura) e aumenta fino a 20 quando progress è 0.5
+      float pixelSize = mix(1.0, 20.0, smoothstep(0.0, 0.5, progress));
+      
+      // Applica la pixelatura solo durante la transizione
+      vec2 pixelatedUV = floor(newUV * pixelSize) / pixelSize;
 
-      // Effetto di pixelazione durante la transizione
-      float pixelSize = mix(1.0, 20.0, progress); // I pixel diventano più grandi durante la transizione
-      vec2 pixelatedUV = floor(newUV * pixelSize) / pixelSize; // Griglia dei pixel per l'effetto
-
-      // Interpolazione tra i due video
+      // Interpolazione tra i due video con pixelatura visibile solo durante la transizione
       vec4 color1 = texture2D(texture1, pixelatedUV);
       vec4 color2 = texture2D(texture2, pixelatedUV);
 
-      // Uso di smoothstep per creare una transizione fluida
+      // Usa smoothstep per miscelare i video in base al progresso
       vec4 finalColor = mix(color1, color2, smoothstep(0.0, 1.0, progress));
 
       gl_FragColor = finalColor;
