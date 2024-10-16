@@ -159,11 +159,11 @@ class Sketch {
       uniforms: {
         time: { type: "f", value: 0 },
         progress: { type: "f", value: 0 },
-        displacementFactor: { type: "f", value: 0.3 },  // Fattore di distorsione
+        displacementFactor: { type: "f", value: 0.3 },  // Regola l'intensità del displacement
         texture1: { type: "t", value: this.textures[0] },
         texture2: { type: "t", value: this.textures[1] },
-        displacementMap: { type: "t", value: new THREE.TextureLoader().load('img/disp1.jpg') }, // Carica la mappa di displacement
-        resolution: { type: "v4", value: new THREE.Vector4() } // Risoluzione e aspetto
+        displacementMap: { type: "t", value: new THREE.TextureLoader().load('img/disp1.jpg') },  // Mappa di displacement
+        resolution: { type: "v4", value: new THREE.Vector4() }
       },
       vertexShader: this.vertex,
       fragmentShader: this.fragment
@@ -213,17 +213,17 @@ class Sketch {
     if (this.paused) return;
     this.time += 0.05;
   
-    // Aggiorna l'uniforme tempo
+    // Assicurati di aggiornare direttamente gli uniforms del materiale
     this.material.uniforms.time.value = this.time;
   
     // Aggiorna le video texture
     this.textures.forEach((texture) => {
       if (texture) {
-        texture.needsUpdate = true;
+        texture.needsUpdate = true; // Forza l'aggiornamento della texture video
       }
     });
   
-    // Se hai impostato controlli per gli uniforms, aggiorna direttamente gli uniforms del materiale
+    // Aggiorna gli uniforms direttamente dal materiale
     Object.keys(this.material.uniforms).forEach((item) => {
       if (this.settings[item] !== undefined) {
         this.material.uniforms[item].value = this.settings[item];
@@ -233,6 +233,5 @@ class Sketch {
     requestAnimationFrame(this.render.bind(this));
     this.renderer.render(this.scene, this.camera);
   }
-  
   
 }
