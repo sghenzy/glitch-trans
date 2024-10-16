@@ -159,15 +159,22 @@ class Sketch {
       uniforms: {
         time: { type: "f", value: 0 },
         progress: { type: "f", value: 0 },
-        displacementFactor: { type: "f", value: 0.3 },  // Regola l'intensità del displacement
-        texture1: { type: "t", value: this.textures[0] },
-        texture2: { type: "t", value: this.textures[1] },
-        displacementMap: { type: "t", value: new THREE.TextureLoader().load('img/disp1.jpg') },  // Mappa di displacement
-        resolution: { type: "v4", value: new THREE.Vector4() }
+        border: { type: "f", value: 0 },
+        intensity: { type: "f", value: 0 },
+        scaleX: { type: "f", value: 40 },
+        scaleY: { type: "f", value: 40 },
+        transition: { type: "f", value: 40 },
+        swipe: { type: "f", value: 0 },
+        width: { type: "f", value: 0 },
+        radius: { type: "f", value: 0 },
+        texture1: { type: "t", value: this.textures[0] }, // Primo video
+        texture2: { type: "t", value: this.textures[1] }, // Secondo video
+        displacement: { type: "t", value: new THREE.TextureLoader().load('img/disp1.jpg') }, // Mappa di distorsione
+        resolution: { type: "v4", value: new THREE.Vector4() }, // Risoluzione e rapporto d'aspetto
       },
       vertexShader: this.vertex,
       fragmentShader: this.fragment
-    });    
+    });
 
     // Crea il piano con dimensioni iniziali di 1x1
     this.geometry = new THREE.PlaneGeometry(1, 1, 2, 2);
