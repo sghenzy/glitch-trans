@@ -10,7 +10,7 @@ let sketch = new Sketch({
     uniform float progress;
     uniform sampler2D texture1;
     uniform sampler2D texture2;
-    uniform sampler2D displacement; // Aggiungiamo una mappa di distorsione per l'effetto glitch
+    uniform sampler2D displacement; // Mappa per distorsione glitch
     uniform vec4 resolution;
 
     varying vec2 vUv;
@@ -38,19 +38,14 @@ let sketch = new Sketch({
         newUV.x = newUV.x * aspectRatio / imageAspectRatio + (1.0 - aspectRatio / imageAspectRatio) * 0.5;
       }
       
-      // Introduciamo un glitch temporaneo durante la transizione
+      // Introduciamo un glitch temporaneo ma fluido durante la transizione
       if (progress > 0.0 && progress < 1.0) {
-        // Distorsione UV per l'effetto glitch
+        // Distorsione UV per un effetto glitch orizzontale molto sottile
         vec4 displacementMap = texture2D(displacement, newUV * 10.0);
-        newUV += displacementMap.rg * 0.1 * sin(time * 10.0);
-        
-        // Effetto di scorrimento casuale
-        if (random(vUv) > 0.9) {
-          newUV.y += random(vUv) * 0.2 * sin(time * 50.0);
-        }
+        newUV.x += displacementMap.r * 0.05 * sin(time * 20.0);
       }
 
-      // Uso di smoothstep per creare una transizione più fluida con glitch
+      // Uso di smoothstep per creare una transizione più fluida
       x = smoothstep(0.0, 1.0, (x * 2.0 + p.y - 1.0));
       
       // Interpolazione tra i due video
@@ -60,11 +55,11 @@ let sketch = new Sketch({
         x
       );
       
-      // Aggiungiamo variazioni di colore casuali per l'effetto glitch
+      // Variazioni di colore molto leggere per creare un effetto glitch fluido
       if (progress > 0.0 && progress < 1.0) {
-        f.r += random(vUv + time) * 0.1;
-        f.g += random(vUv + time + 10.0) * 0.1;
-        f.b += random(vUv + time + 20.0) * 0.1;
+        f.r += random(vUv + time) * 0.02;
+        f.g += random(vUv + time + 10.0) * 0.02;
+        f.b += random(vUv + time + 20.0) * 0.02;
       }
 
       gl_FragColor = f;
