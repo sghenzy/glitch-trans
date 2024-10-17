@@ -34,17 +34,20 @@ let sketch = new Sketch({
         newUV.x = newUV.x * aspectRatio / imageAspectRatio + (1.0 - aspectRatio / imageAspectRatio) * 0.5;
       }
 
-      // Durante la transizione, aumenta il livello di pixelazione
-      float pixelSize = mix(1.0, 50.0, progress); // Da 1 (nessuna pixelazione) a 50 (pixelazione massima)
-      vec2 pixelatedUV = pixelate(newUV, pixelSize);
+      // Applica la pixelazione solo durante la transizione
+      vec2 finalUV = newUV;
+      if (progress > 0.0 && progress < 1.0) {
+        float pixelSize = mix(1.0, 50.0, progress); // Da 1 (nessuna pixelazione) a 50 (pixelazione massima)
+        finalUV = pixelate(newUV, pixelSize);
+      }
 
-      // Interpolazione tra i due video durante la transizione
-      vec4 color1 = texture2D(texture1, pixelatedUV);
-      vec4 color2 = texture2D(texture2, pixelatedUV);
+      // Interpolazione tra i due video
+      vec4 color1 = texture2D(texture1, finalUV);
+      vec4 color2 = texture2D(texture2, finalUV);
 
-      // Miscelazione fluida tra i due video in base al progresso
+      // Miscelazione fluida tra i due video in base al progresso della transizione
       vec4 finalColor = mix(color1, color2, progress);
-      
+
       gl_FragColor = finalColor;
     }
   `
