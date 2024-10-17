@@ -34,11 +34,15 @@ let sketch = new Sketch({
         newUV.x = newUV.x * aspectRatio / imageAspectRatio + (1.0 - aspectRatio / imageAspectRatio) * 0.5;
       }
 
-      // Applica la pixelazione solo durante la transizione
+      // Applica la pixelazione solo durante la transizione con un effetto fade-out graduale
       vec2 finalUV = newUV;
       if (progress > 0.0 && progress < 1.0) {
         float pixelSize = mix(1.0, 50.0, progress); // Da 1 (nessuna pixelazione) a 50 (pixelazione massima)
         finalUV = pixelate(newUV, pixelSize);
+
+        // Applichiamo un effetto di dissolvenza per i pixel verso la fine
+        float fade = smoothstep(0.8, 1.0, progress); // Fade in/out nella fase finale della transizione
+        finalUV = mix(finalUV, newUV, fade); // Transizione fluida verso la non-pixelazione
       }
 
       // Interpolazione tra i due video
