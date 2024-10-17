@@ -112,11 +112,11 @@ class Sketch {
   
     let a1, a2;
     if (this.height / this.width > this.imageAspect) {
-      // La finestra è più alta rispetto al video: bande nere laterali
+      // Se la finestra è più alta rispetto al video
       a1 = (this.width / this.height) * this.imageAspect;
       a2 = 1;
     } else {
-      // La finestra è più larga rispetto al video: bande nere sopra e sotto
+      // Se la finestra è più larga rispetto al video
       a1 = 1;
       a2 = (this.height / this.width) / this.imageAspect;
     }
@@ -127,13 +127,20 @@ class Sketch {
     this.material.uniforms.resolution.value.z = a1;
     this.material.uniforms.resolution.value.w = a2;
   
-    // Imposta la scala del piano per rispettare il rapporto d'aspetto originale senza tagliare
-    this.plane.scale.x = a1;
-    this.plane.scale.y = a2;
+    // Imposta la scala del piano per comportarsi come 'object-fit: cover'
+    if (this.camera.aspect > this.imageAspect) {
+      // Riempie in larghezza e ritaglia in altezza
+      this.plane.scale.x = this.camera.aspect / this.imageAspect;
+      this.plane.scale.y = 1;
+    } else {
+      // Riempie in altezza e ritaglia in larghezza
+      this.plane.scale.x = 1;
+      this.plane.scale.y = this.imageAspect / this.camera.aspect;
+    }
   
     this.camera.updateProjectionMatrix();
   }
-  
+    
 
 
   addObjects() {
