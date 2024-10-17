@@ -102,34 +102,50 @@ class Sketch {
   }
 
   resize() {
-    this.width = this.container.offsetWidth;
-    this.height = this.container.offsetHeight;
-    this.renderer.setSize(this.width, this.height);
-    this.camera.aspect = this.width / this.height;
+  this.width = this.container.offsetWidth;
+  this.height = this.container.offsetHeight;
+  this.renderer.setSize(this.width, this.height);
+  this.camera.aspect = this.width / this.height;
 
-    // Calcola il rapporto d'aspetto del video
-    this.imageAspect = this.textures[0].image.videoHeight / this.textures[0].image.videoWidth;
-    
-    let scaleX, scaleY;
-    
-    // Verifica se lo spazio dell'altezza è maggiore o lo spazio della larghezza è maggiore
-    if (this.width / this.height > this.imageAspect) {
-        // Se la larghezza della finestra è maggiore, adattiamo l'altezza
-        scaleX = this.width / this.height * this.imageAspect;
-        scaleY = 1;
-    } else {
-        // Se l'altezza della finestra è maggiore, adattiamo la larghezza
-        scaleX = 1;
-        scaleY = this.height / this.width / this.imageAspect;
-    }
+  // Calcola il rapporto d'aspetto del video
+  this.imageAspect = this.textures[0].image.videoHeight / this.textures[0].image.videoWidth;
 
-    // Applica la scala al piano
-    this.plane.scale.x = scaleX;
-    this.plane.scale.y = scaleY;
-
-    this.camera.updateProjectionMatrix(); 
+  let a1, a2;
+  if (this.height / this.width > this.imageAspect) {
+    // Se la finestra è più alta rispetto al video
+    a1 = (this.width / this.height) * this.imageAspect;
+    a2 = 1;
+  } else {
+    // Se la finestra è più larga rispetto al video
+    a1 = 1;
+    a2 = (this.height / this.width) / this.imageAspect;
   }
-  
+
+  // Passiamo le dimensioni corrette allo shader
+  this.material.uniforms.resolution.value.x = this.width;
+  this.material.uniforms.resolution.value.y = this.height;
+  this.material.uniforms.resolution.value.z = a1;
+  this.material.uniforms.resolution.value.w = a2;
+
+  // Aggiorna il campo visivo della camera in base alla distanza
+  const dist = this.camera.position.z;
+  const height = 1;
+  this.camera.fov = 2 * (180 / Math.PI) * Math.atan(height / (2 * dist));
+
+  // Imposta la scala del piano per comportarsi come 'object-fit: cover'
+  if (this.camera.aspect > this.imageAspect) {
+    // Riempie in larghezza e ritaglia in altezza
+    this.plane.scale.x = this.camera.aspect / this.imageAspect;
+    this.plane.scale.y = 1;
+  } else {
+    // Riempie in altezza e ritaglia in larghezza
+    this.plane.scale.x = 1;
+    this.plane.scale.y = this.imageAspect / this.camera.aspect;
+  }
+
+  this.camera.updateProjectionMatrix();
+}
+
 
   addObjects() {
     let that = this;
