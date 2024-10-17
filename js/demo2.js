@@ -15,21 +15,8 @@ let sketch = new Sketch({
     varying vec2 vUv;
 
     void main() {
-      // Calcolo delle UV originali
-      vec2 newUV = vUv;
-
-      // Calcola il rapporto d'aspetto del container e del video
-      float aspectRatio = resolution.x / resolution.y;
-      float imageAspectRatio = resolution.z / resolution.w;
-
-      // Controlliamo quale dimensione del video (larghezza o altezza) deve essere scalata per riempire la finestra
-      if (aspectRatio > imageAspectRatio) {
-        // Se la finestra è più larga del video, scalare in altezza
-        newUV.y = (newUV.y - 0.5) * (imageAspectRatio / aspectRatio) + 0.5;
-      } else {
-        // Se la finestra è più alta del video, scalare in larghezza
-        newUV.x = (newUV.x - 0.5) * (aspectRatio / imageAspectRatio) + 0.5;
-      }
+      // Manteniamo le UV corrette per il video senza distorsioni
+      vec2 newUV = (vUv - vec2(0.5)) * resolution.zw + vec2(0.5);
 
       // Applica la pixelazione solo durante la transizione con un effetto fade-out graduale
       vec2 finalUV = newUV;
@@ -46,7 +33,7 @@ let sketch = new Sketch({
       vec4 color1 = texture2D(texture1, finalUV);
       vec4 color2 = texture2D(texture2, finalUV);
 
-      // Miscelazione fluida tra i due video in base al progresso della transizione
+      // Transizione tra i due video
       vec4 finalColor = mix(color1, color2, progress);
 
       gl_FragColor = finalColor;

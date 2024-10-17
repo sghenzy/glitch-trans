@@ -3,14 +3,14 @@
 	font-size: 16px;
 }
 
-body {
+body, html {
 	margin: 0;
-	color: #000;
-	background-color: #000;
-	font-family: ivymode, -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-}
+	padding: 0;
+	overflow: hidden;
+	width: 100vw;
+	height: 100vh;
+  }
+  
 
 a {
 	text-decoration: none;
@@ -26,28 +26,24 @@ a:focus {
 }
 
 /* Slider styling */
-.content {
+
+  .content {
 	display: flex;
-	flex-direction: column;
+	justify-content: center;
+	align-items: center;
 	width: 100vw;
 	height: 100vh;
 	position: relative;
-	justify-content: center;
-	align-items: center;
 	cursor: pointer;
-	overflow: hidden; /* Aggiunto per evitare che ci siano overflow */
-}
-
-#slider {
-	display: flex;
-	align-items: center;
-	justify-content: center; /* Aggiunto per centrare il contenuto */
+	overflow: hidden;
+  }
+  
+  #slider {
 	width: 100%;
 	height: 100%;
-	position: relative; /* Aggiunto per gestire meglio la dimensione */
 	z-index: -1;
-	overflow: hidden; /* Aggiunto per evitare che il video esca dai bordi */
-}
+  }
+  
 
 #slider video {
 	object-fit: cover; /* Questo assicura che il video riempia il container mantenendo il rapporto d'aspetto */
