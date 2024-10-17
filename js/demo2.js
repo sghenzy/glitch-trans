@@ -25,10 +25,10 @@ let sketch = new Sketch({
       // Object-fit: cover
       if (aspectRatio > imageAspectRatio) {
         // La finestra è più larga del video, quindi scalare in altezza
-        newUV.y = newUV.y * imageAspectRatio / aspectRatio + (1.0 - imageAspectRatio / aspectRatio) * 0.5;
+        newUV.y = (newUV.y - 0.5) * aspectRatio / imageAspectRatio + 0.5;
       } else {
         // La finestra è più alta del video, quindi scalare in larghezza
-        newUV.x = newUV.x * aspectRatio / imageAspectRatio + (1.0 - aspectRatio / imageAspectRatio) * 0.5;
+        newUV.x = (newUV.x - 0.5) * imageAspectRatio / aspectRatio + 0.5;
       }
 
       // Applica la pixelazione solo durante la transizione con un effetto fade-out graduale
