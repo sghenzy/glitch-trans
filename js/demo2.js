@@ -23,14 +23,13 @@ let sketch = new Sketch({
       float imageAspectRatio = resolution.z / resolution.w;
 
       // Controlliamo quale dimensione del video (larghezza o altezza) deve essere scalata per riempire la finestra
-      if (aspectRatio < imageAspectRatio) {
-        // La finestra è più alta rispetto al video, quindi scalare in altezza
-        newUV.x = (newUV.x - 0.5) * (imageAspectRatio / aspectRatio) + 0.5;
+      if (aspectRatio > imageAspectRatio) {
+        // Se la finestra è più larga del video, scalare in altezza
+        newUV.y = (newUV.y - 0.5) * (imageAspectRatio / aspectRatio) + 0.5;
       } else {
-        // La finestra è più larga rispetto al video, quindi scalare in larghezza
-        newUV.y = (newUV.y - 0.5) * (aspectRatio / imageAspectRatio) + 0.5;
+        // Se la finestra è più alta del video, scalare in larghezza
+        newUV.x = (newUV.x - 0.5) * (aspectRatio / imageAspectRatio) + 0.5;
       }
-
 
       // Applica la pixelazione solo durante la transizione con un effetto fade-out graduale
       vec2 finalUV = newUV;
