@@ -14,9 +14,8 @@ let sketch = new Sketch({
 
     varying vec2 vUv;
 
-    // Funzione per creare l'effetto pixelato
+    // Funzione per applicare l'effetto pixelato
     vec2 pixelate(vec2 uv, float pixelSize) {
-      // Arrotonda le coordinate UV al pixel più vicino
       uv = floor(uv * pixelSize) / pixelSize;
       return uv;
     }
@@ -35,11 +34,11 @@ let sketch = new Sketch({
         newUV.x = newUV.x * aspectRatio / imageAspectRatio + (1.0 - aspectRatio / imageAspectRatio) * 0.5;
       }
 
-      // Aumenta il livello di pixelazione in base al progresso della transizione
-      float pixelSize = mix(1.0, 50.0, progress); // 1.0 = nessuna pixelazione, 50.0 = massima pixelazione
+      // Durante la transizione, aumenta il livello di pixelazione
+      float pixelSize = mix(1.0, 50.0, progress); // Da 1 (nessuna pixelazione) a 50 (pixelazione massima)
       vec2 pixelatedUV = pixelate(newUV, pixelSize);
 
-      // Interpolazione tra i due video con pixelazione
+      // Interpolazione tra i due video durante la transizione
       vec4 color1 = texture2D(texture1, pixelatedUV);
       vec4 color2 = texture2D(texture2, pixelatedUV);
 
