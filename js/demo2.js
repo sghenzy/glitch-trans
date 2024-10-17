@@ -15,20 +15,20 @@ let sketch = new Sketch({
     varying vec2 vUv;
 
     void main() {
-      // Manteniamo le UV corrette per centrare il video senza distorsioni
+      // Calcolo delle UV originali
       vec2 newUV = vUv;
 
-      // Calcolo dell'aspect ratio della finestra e del video
-      float aspectRatio = resolution.x / resolution.y; // Aspect ratio del container
-      float imageAspectRatio = resolution.z / resolution.w; // Aspect ratio del video
+      // Calcola il rapporto d'aspetto del container e del video
+      float aspectRatio = resolution.x / resolution.y;
+      float imageAspectRatio = resolution.z / resolution.w;
 
-      // Object-fit: cover
+      // Controlliamo quale dimensione del video (larghezza o altezza) deve essere scalata per riempire la finestra
       if (aspectRatio > imageAspectRatio) {
-        // La finestra è più larga del video, quindi scalare in altezza
-        newUV.y = (newUV.y - 0.5) * aspectRatio / imageAspectRatio + 0.5;
+        // Se la finestra è più larga del video, scalare in altezza
+        newUV.y = (newUV.y - 0.5) * (imageAspectRatio / aspectRatio) + 0.5;
       } else {
-        // La finestra è più alta del video, quindi scalare in larghezza
-        newUV.x = (newUV.x - 0.5) * imageAspectRatio / aspectRatio + 0.5;
+        // Se la finestra è più alta del video, scalare in larghezza
+        newUV.x = (newUV.x - 0.5) * (aspectRatio / imageAspectRatio) + 0.5;
       }
 
       // Applica la pixelazione solo durante la transizione con un effetto fade-out graduale
