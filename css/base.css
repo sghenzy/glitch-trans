@@ -39,4 +39,15 @@ body {
 	align-items: center;
 	z-index: -1;
   }
+
+  canvas {
+	display: block;
+	width: 100vw;
+	height: 100vh;
+	position: absolute;
+	top: 0;
+	left: 0;
+	object-fit: cover; /* Mantiene il rapporto d'aspetto del video */
+  }
+  
   

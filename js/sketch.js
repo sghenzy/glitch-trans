@@ -1,40 +1,57 @@
 class Sketch {
   constructor(opts) {
     this.scene = new THREE.Scene();
-    this.vertex = `varying vec2 vUv;void main() {vUv = uv;gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );}`;
+    
+    // Renderer con anti-aliasing e alpha per trasparenza
+    this.renderer = new THREE.WebGLRenderer({
+      antialias: true,
+      alpha: true // Canvas trasparente se necessario
+    });
+    
+    // Impostazioni del renderer
+    this.renderer.setPixelRatio(window.devicePixelRatio);
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    
+    // Impostazioni della scena e del canvas
+    document.body.appendChild(this.renderer.domElement);
+  
+    this.vertex = `varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`;
     this.fragment = opts.fragment;
     this.uniforms = opts.uniforms;
-    this.renderer = new THREE.WebGLRenderer();
+  
+    // Dimensioni del canvas
     this.width = window.innerWidth;
     this.height = window.innerHeight;
-    this.renderer.setPixelRatio(window.devicePixelRatio);
     this.renderer.setSize(this.width, this.height);
-    this.renderer.setClearColor(0xeeeeee, 1);
+    this.renderer.setClearColor(0xeeeeee, 1); // Rimuovere se non desideri un background bianco
+  
     this.duration = opts.duration || 1;
     this.debug = opts.debug || false;
     this.easing = opts.easing || 'easeInOut';
-
+  
     this.clicker = document.getElementById("content");
-
     this.container = document.getElementById("slider");
-    this.videos = ['video/reel1.webm', 'video/reel2.webm']; // Percorsi dei video
+    
+    // Definisco i percorsi dei video
+    this.videos = ['video/reel1.webm', 'video/reel2.webm'];
+    
+    // Ottieni le dimensioni dal container e aggiungi il canvas
     this.width = this.container.offsetWidth;
     this.height = this.container.offsetHeight;
     this.container.appendChild(this.renderer.domElement);
-
-    this.camera = new THREE.PerspectiveCamera(
-      70,
-      window.innerWidth / window.innerHeight,
-      0.001,
-      1000
-    );
-
+  
+    // Configura la camera
+    this.camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.001, 1000);
     this.camera.position.set(0, 0, 2);
+  
     this.time = 0;
     this.current = 0;
     this.textures = [];
-
+  
+    // Imposta il flag di pausa
     this.paused = true;
+  
+    // Inizializza il setup, carica i video e avvia il rendering
     this.initiate(() => {
       console.log(this.textures);
       this.setupResize();
@@ -45,40 +62,39 @@ class Sketch {
       this.play();
     });
   }
+  
 
   initiate(cb) {
     const promises = [];
     let that = this;
-
+  
     this.videos.forEach((url, i) => {
       let video = document.createElement('video');
       video.src = url;
       video.muted = true;
       video.autoplay = true;
       video.loop = true;
-
-      // Creiamo una Promise per ogni video
+  
+      // Promise per caricare i video
       let promise = new Promise((resolve) => {
         video.addEventListener('loadeddata', () => {
-          console.log(`Video ${i + 1} caricato: ${url}`);
           video.play();
           that.textures[i] = new THREE.VideoTexture(video);
           that.textures[i].minFilter = THREE.LinearFilter;
           that.textures[i].magFilter = THREE.LinearFilter;
-          that.textures[i].format = THREE.RGBFormat; // Imposta il formato corretto
-          resolve();  // Risolviamo la Promise quando il video è pronto
+          that.textures[i].format = THREE.RGBFormat;
+          resolve();
         });
       });
-
+  
       promises.push(promise);
     });
-
-    // Attendi il caricamento di tutti i video prima di procedere
+  
     Promise.all(promises).then(() => {
-      console.log("Tutti i video sono stati caricati correttamente.");
       cb();
     });
   }
+  
 
   clickEvent() {
     this.clicker.addEventListener('click', () => {
@@ -102,50 +118,47 @@ class Sketch {
   }
 
   resize() {
-    this.width = this.container.offsetWidth;
-    this.height = this.container.offsetHeight;
+    this.width = window.innerWidth;
+    this.height = window.innerHeight;
     this.renderer.setSize(this.width, this.height);
     this.camera.aspect = this.width / this.height;
   
-    // Manteniamo l'aspect ratio del video
+    // Manteniamo l'aspect ratio del video originale
     this.imageAspect = this.textures[0].image.videoHeight / this.textures[0].image.videoWidth;
   
     let a1, a2;
     if (this.height / this.width > this.imageAspect) {
-      // Se la finestra è più alta rispetto al video
+      // Se la finestra è più alta rispetto al video, scalare la larghezza
       a1 = (this.width / this.height) * this.imageAspect;
       a2 = 1;
     } else {
-      // Se la finestra è più larga rispetto al video
+      // Se la finestra è più larga rispetto al video, scalare l'altezza
       a1 = 1;
       a2 = (this.height / this.width) / this.imageAspect;
     }
   
-    // Passiamo le dimensioni corrette allo shader
+    // Aggiorniamo le dimensioni corrette nello shader
     this.material.uniforms.resolution.value.x = this.width;
     this.material.uniforms.resolution.value.y = this.height;
     this.material.uniforms.resolution.value.z = a1;
     this.material.uniforms.resolution.value.w = a2;
   
-    // Aggiorna il campo visivo della camera in base alla distanza
+    // Aggiorna il campo visivo della camera per mantenere il video centrato
     const dist = this.camera.position.z;
     const height = 1;
     this.camera.fov = 2 * (180 / Math.PI) * Math.atan(height / (2 * dist));
   
     // Imposta la scala del piano per comportarsi come 'object-fit: cover'
     if (this.camera.aspect > this.imageAspect) {
-      // Riempie in larghezza e ritaglia in altezza
       this.plane.scale.x = this.camera.aspect / this.imageAspect;
       this.plane.scale.y = 1;
     } else {
-      // Riempie in altezza e ritaglia in larghezza
       this.plane.scale.x = 1;
       this.plane.scale.y = this.imageAspect / this.camera.aspect;
     }
   
     this.camera.updateProjectionMatrix();
   }  
-
 
   addObjects() {
     let that = this;
